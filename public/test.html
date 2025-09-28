@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Dashboard Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .status {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #output {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: left;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ESP32 Dashboard - Server Test</h1>
+        
+        <div class="status">
+            <h3>Server Status: <span id="serverStatus">Checking...</span></h3>
+            <p>Time: <span id="currentTime"></span></p>
+        </div>
+
+        <div>
+            <button onclick="checkHealth()">Check Server Health</button>
+            <button onclick="testESP32Data()">Test ESP32 Endpoint</button>
+            <button onclick="getData()">Get Current Data</button>
+        </div>
+
+        <div id="output">Waiting for tests...</div>
+    </div>
+
+    <script>
+        // Update time every second
+        function updateTime() {
+            document.getElementById('currentTime').textContent = new Date().toLocaleString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Check server health
+        async function checkHealth() {
+            const output = document.getElementById('output');
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                output.textContent = 'Health Check Result:\n' + JSON.stringify(data, null, 2);
+                document.getElementById('serverStatus').textContent = 'Online ✅';
+            } catch (error) {
+                output.textContent = 'Health Check Failed:\n' + error.message;
+                document.getElementById('serverStatus').textContent = 'Offline ❌';
+            }
+        }
+
+        // Test ESP32 data endpoint
+        async function testESP32Data() {
+            const output = document.getElementById('output');
+            try {
+                const testData = {
+                    temperature: 25.5,
+                    humidity: 60,
+                    qr_code: "TEST123"
+                };
+                
+                const response = await fetch('/esp-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                output.textContent = 'ESP32 Endpoint Test:\n' + JSON.stringify(result, null, 2);
+            } catch (error) {
+                output.textContent = 'ESP32 Test Failed:\n' + error.message;
+            }
+        }
+
+        // Get current data
+        async function getData() {
+            const output = document.getElementById('output');
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                output.textContent = 'Current Data:\n' + JSON.stringify(data, null, 2);
+            } catch (error) {
+                output.textContent = 'Get Data Failed:\n' + error.message;
+            }
+        }
+
+        // Auto-check health on load
+        window.onload = function() {
+            checkHealth();
+        }
+    </script>
+</body>
+</html>
