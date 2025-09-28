@@ -1,29 +1,68 @@
 {
-  "name": "esp32-dashboard",
+  "name": "esp32-sensor-dashboard",
   "version": "1.0.0",
-  "description": "ESP32 CAM data dashboard with real-time monitoring",
+  "description": "Real-time IoT dashboard for ESP32 with temperature, humidity monitoring and QR code detection. Built with React + Node.js + Express",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build": "npm run build:react",
-    "build:react": "npm run create-html"
+    "build": "echo 'Build completed - static files ready'",
+    "test": "echo 'No tests specified'",
+    "vercel-build": "echo 'Vercel build completed'",
+    "railway-build": "npm install",
+    "heroku-postbuild": "echo 'Heroku build completed'"
   },
   "keywords": [
     "esp32",
     "iot",
+    "arduino",
     "dashboard",
-    "react",
+    "sensors",
+    "monitoring",
+    "realtime",
+    "nodejs",
     "express",
-    "sensors"
+    "react",
+    "dht11",
+    "dht22",
+    "temperature",
+    "humidity",
+    "qr-code",
+    "home-automation",
+    "weather-station",
+    "microcontroller"
   ],
-  "author": "Your Name",
+  "author": {
+    "name": "Sanket Mali",
+    "email": "sanketmali2409@gmail.com",
+    "url": "https://github.com/sanketmali2409"
+  },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sanketmali2409/esp32-iot-dashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sanketmali2409/esp32-iot-dashboard/issues"
+  },
+  "homepage": "https://github.com/sanketmali2409/esp32-iot-dashboard#readme",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
+  },
+  "optionalDependencies": {},
+  "peerDependencies": {},
+  "bundledDependencies": [],
+  "private": false,
+  "workspaces": [],
+  "config": {
+    "port": 3000
   }
 }
