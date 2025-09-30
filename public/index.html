@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+ <!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -425,4 +425,310 @@
         window.addEventListener('load', init);
     </script>
 </body>
-</html> 
+</html>  -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Control Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+        
+        .device-selector {
+            margin-bottom: 20px;
+        }
+        
+        .device-selector label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .device-selector select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .device-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .control-btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        
+        .control-btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-led-on { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .btn-led-off { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .btn-capture { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .btn-qr { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .btn-status { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+        .btn-restart { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); }
+        
+        .custom-command {
+            margin-top: 20px;
+        }
+        
+        .custom-command input {
+            width: calc(100% - 120px);
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        
+        .custom-command button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .sensor-data {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .sensor-box {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%);
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .sensor-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        
+        .sensor-box .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎛️ ESP32 Control Panel</h1>
+            <p>Remote Command Center</p>
+        </div>
+        
+        <div class="card">
+            <div class="device-selector">
+                <label>Select Device:</label>
+                <select id="deviceSelect">
+                    <option value="ESP32_CAM_001">ESP32_CAM_001</option>
+                </select>
+            </div>
+            
+            <div class="controls-grid">
+                <button class="control-btn btn-led-on" onclick="sendCommand('led_on')">💡 LED ON</button>
+                <button class="control-btn btn-led-off" onclick="sendCommand('led_off')">🌙 LED OFF</button>
+                <button class="control-btn btn-capture" onclick="sendCommand('capture')">📸 Capture</button>
+                <button class="control-btn btn-qr" onclick="sendCommand('scan_qr')">🔍 Scan QR</button>
+                <button class="control-btn btn-status" onclick="sendCommand('status')">📊 Status</button>
+                <button class="control-btn btn-restart" onclick="sendCommand('restart')">🔄 Restart</button>
+            </div>
+            
+            <div class="custom-command">
+                <input type="text" id="customCmd" placeholder="Enter custom command...">
+                <button onclick="sendCustomCommand()">Send</button>
+            </div>
+            
+            <div id="statusMsg" class="status"></div>
+        </div>
+        
+        <div class="card">
+            <h2 style="margin-bottom: 15px; color: #667eea;">📊 Live Sensor Data</h2>
+            <div class="sensor-data">
+                <div class="sensor-box">
+                    <h3>Temperature</h3>
+                    <div class="value" id="temperature">--</div>
+                </div>
+                <div class="sensor-box">
+                    <h3>Humidity</h3>
+                    <div class="value" id="humidity">--</div>
+                </div>
+                <div class="sensor-box">
+                    <h3>WiFi Signal</h3>
+                    <div class="value" id="wifi">--</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SERVER_URL = 'https://esp32-iot-dashboard-9a8y.vercel.app';
+        
+        function sendCommand(command) {
+            const deviceId = document.getElementById('deviceSelect').value;
+            const statusDiv = document.getElementById('statusMsg');
+            
+            fetch(`${SERVER_URL}/esp-command`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    device_id: deviceId,
+                    command: command
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                showStatus(`✅ Command "${command}" sent successfully!`, 'success');
+            })
+            .catch(error => {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            });
+        }
+        
+        function sendCustomCommand() {
+            const command = document.getElementById('customCmd').value.trim();
+            if (command) {
+                sendCommand(command);
+                document.getElementById('customCmd').value = '';
+            }
+        }
+        
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMsg');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Fetch sensor data periodically
+        function updateSensorData() {
+            const deviceId = document.getElementById('deviceSelect').value;
+            
+            fetch(`${SERVER_URL}/esp-data?device_id=${deviceId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.temperature !== undefined) {
+                        document.getElementById('temperature').textContent = data.temperature + '°C';
+                        document.getElementById('humidity').textContent = data.humidity + '%';
+                        document.getElementById('wifi').textContent = data.wifi_signal + ' dBm';
+                    }
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+        
+        // Update sensor data every 3 seconds
+        setInterval(updateSensorData, 3000);
+        updateSensorData();
+        
+        // Allow Enter key to send custom command
+        document.getElementById('customCmd').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendCustomCommand();
+            }
+        });
+    </script>
+</body>
+</html>
