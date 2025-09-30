@@ -704,21 +704,36 @@
         }
         
         // Fetch sensor data periodically
+        // function updateSensorData() {
+        //     const deviceId = document.getElementById('deviceSelect').value;
+            
+        //     fetch(`${SERVER_URL}/esp-data?device_id=${deviceId}`)
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             if (data.temperature !== undefined) {
+        //                 document.getElementById('temperature').textContent = data.temperature + '°C';
+        //                 document.getElementById('humidity').textContent = data.humidity + '%';
+        //                 document.getElementById('wifi').textContent = data.wifi_signal + ' dBm';
+        //             }
+        //         })
+        //         .catch(error => console.error('Error fetching data:', error));
+        // }
+        
+         // Fetch sensor data periodically
         function updateSensorData() {
             const deviceId = document.getElementById('deviceSelect').value;
             
-            fetch(`${SERVER_URL}/esp-data?device_id=${deviceId}`)
+            fetch(`${SERVER_URL}/api/data`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.temperature !== undefined) {
+                    if (data.temperature !== undefined && data.temperature !== null) {
                         document.getElementById('temperature').textContent = data.temperature + '°C';
                         document.getElementById('humidity').textContent = data.humidity + '%';
-                        document.getElementById('wifi').textContent = data.wifi_signal + ' dBm';
+                        document.getElementById('wifi').textContent = (data.wifi_signal || '--') + ' dBm';
                     }
                 })
                 .catch(error => console.error('Error fetching data:', error));
         }
-        
         // Update sensor data every 3 seconds
         setInterval(updateSensorData, 3000);
         updateSensorData();
